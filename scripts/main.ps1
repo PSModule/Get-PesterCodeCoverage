@@ -10,7 +10,7 @@ $codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' 
 gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
 $files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json | Sort-Object Name
 
-LogGroup 'List CodeCoverage files' {
+LogGroup 'List files' {
     $files.Name | Out-String
 }
 
@@ -30,7 +30,7 @@ foreach ($file in $files) {
     }
 }
 
-LogGroup 'CodeCoverage - Summary' {
+LogGroup 'Summary' {
     $codeCoverage | Format-List | Out-String
 }
 
