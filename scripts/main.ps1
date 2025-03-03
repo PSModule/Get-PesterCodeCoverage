@@ -1,24 +1,27 @@
 #Requires -Modules GitHub
 
 [CmdletBinding()]
-param(
-    [Parameter()]
-    [string] $Subject = $env:<ORG_NAME>_<REPO_NAME>_INPUT_subject
-)
+param()
 
-begin {
-    $scriptName = $MyInvocation.MyCommand.Name
-    Write-Debug "[$scriptName] - Start"
+$PSStyle.OutputRendering = 'Ansi'
+$repo = $env:GITHUB_REPOSITORY
+$runId = $env:GITHUB_RUN_ID
+$codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' -Force
+gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
+$files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File
+
+LogGroup 'List CodeCoverage files' {
+    $files.Name | Out-String
 }
 
-process {
-    try {
-        Write-Output "Hello, $Subject!"
-    } catch {
-        throw $_
+$codeCoverage = [System.Collections.Generic.List[psobject]]::new()
+foreach ($file in $files) {
+    $fileName = $file.BaseName
+    $xmlDoc = [xml](Get-Content -Path $file.FullName)
+    LogGroup $fileName {
+        Get-Content -Path $file | Out-String
     }
-}
-
-end {
-    Write-Debug "[$scriptName] - End"
+    LogGroup "$fileName - xml" {
+        $xmlDoc
+    }
 }
