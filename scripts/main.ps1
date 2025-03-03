@@ -17,19 +17,21 @@ LogGroup 'List CodeCoverage files' {
 $codeCoverage = [System.Collections.Generic.List[psobject]]::new()
 foreach ($file in $files) {
     $fileName = $file.BaseName
-    LogGroup $fileName {
-        $content = Get-Content -Path $file
-        $content | Out-String
-    }
-    LogGroup "$fileName - Summary" {
-        $object = $content | ConvertFrom-Json
-        $object | Format-Table | Out-String
-        $codeCoverage.Add($object)
+    $content = Get-Content -Path $file
+    $object = $content | ConvertFrom-Json
+    $codeCoverage.Add($object)
+
+    # LogGroup $fileName {
+    #     $content | Out-String
+    # }
+
+    LogGroup "$fileName" {
+        $object | Format-List | Out-String
     }
 }
 
 LogGroup 'CodeCoverage - Summary' {
-    $codeCoverage | Format-Table | Out-String
+    $codeCoverage | Format-List | Out-String
 }
 
 # # Function to merge counters
