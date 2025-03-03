@@ -21,11 +21,8 @@ foreach ($file in $files) {
     $object = $content | ConvertFrom-Json
     $codeCoverage.Add($object)
 
-    # LogGroup $fileName {
-    #     $content | Out-String
-    # }
-
-    LogGroup "$fileName" {
+    $logGroupName = $fileName.Replace('-CodeCoverage-Report', '')
+    LogGroup "$logGroupName" {
         $object | Format-List | Out-String
     }
 }
