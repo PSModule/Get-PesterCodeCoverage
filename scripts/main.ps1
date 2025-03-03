@@ -26,8 +26,8 @@ foreach ($file in $files) {
         $object | Format-List | Out-String
     }
 }
-
-LogGroup 'Summary' {
+Write-Output ('─' * 50)
+LogGroup ' - Summary' {
     $codeCoverage | Format-List | Out-String
 }
 
