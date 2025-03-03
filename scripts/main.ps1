@@ -22,7 +22,7 @@ foreach ($file in $files) {
     $codeCoverage.Add($object)
 
     $logGroupName = $fileName.Replace('-CodeCoverage-Report', '')
-    LogGroup "$logGroupName" {
+    LogGroup " - $logGroupName" {
         $object | Format-List | Out-String
     }
 }
