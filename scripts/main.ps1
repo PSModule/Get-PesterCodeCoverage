@@ -8,7 +8,7 @@ $repo = $env:GITHUB_REPOSITORY
 $runId = $env:GITHUB_RUN_ID
 $codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' -Force
 gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
-$files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json
+$files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json | Sort-Object Name
 
 LogGroup 'List CodeCoverage files' {
     $files.Name | Out-String
