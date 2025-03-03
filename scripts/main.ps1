@@ -14,19 +14,23 @@ LogGroup 'List CodeCoverage files' {
     $files.Name | Out-String
 }
 
-# $codeCoverage = [System.Collections.Generic.List[psobject]]::new()
-# foreach ($file in $files) {
-#     $fileName = $file.BaseName
-#     $xmlDoc = [xml](Get-Content -Path $file.FullName)
-#     LogGroup $fileName {
-#         Get-Content -Path $file | Out-String
-#     }
-#     LogGroup "$fileName - xml" {
-#         $xmlDoc
-#     }
-# }
+$codeCoverage = [System.Collections.Generic.List[psobject]]::new()
+foreach ($file in $files) {
+    $fileName = $file.BaseName
+    LogGroup $fileName {
+        $content = Get-Content -Path $file
+        $content | Out-String
+    }
+    LogGroup "$fileName - Summary" {
+        $object = $content | ConvertFrom-Json
+        $object | Format-Table | Out-String
+        $codeCoverage.Add($object)
+    }
+}
 
-
+LogGroup 'CodeCoverage - Summary' {
+    $codeCoverage | Format-Table | Out-String
+}
 
 # # Function to merge counters
 # function Merge-Counters($baseNode, $newNode) {
