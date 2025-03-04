@@ -9,6 +9,7 @@ LogGroup 'Init - Setup prerequisites' {
         Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
         Import-Module -Name $_
     }
+    Import-Module "$PSScriptRoot/Helpers.psm1"
 }
 
 $PSStyle.OutputRendering = 'Ansi'
@@ -34,12 +35,34 @@ foreach ($file in $files) {
     # Convert each JSON file into an object
     $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
 
-    # Accumulate coverage items
+    # --- Normalize file paths in CommandsMissed, CommandsExecuted, and FilesAnalyzed ---
+    # 1. Normalize every "File" property in CommandsMissed
+    foreach ($missed in $jsonContent.CommandsMissed) {
+        if ($missed.File) {
+            $missed.File = Convert-ToRelativePath $missed.File
+        }
+    }
+
+    # 2. Normalize every "File" property in CommandsExecuted
+    foreach ($exec in $jsonContent.CommandsExecuted) {
+        if ($exec.File) {
+            $exec.File = Convert-ToRelativePath $exec.File
+        }
+    }
+
+    # 3. Normalize the file paths in FilesAnalyzed
+    $normalizedFiles = @()
+    foreach ($fa in $jsonContent.FilesAnalyzed) {
+        $normalizedFiles += Convert-ToRelativePath $fa
+    }
+    $jsonContent.FilesAnalyzed = $normalizedFiles
+
+    # Now accumulate coverage items
     $allMissed += $jsonContent.CommandsMissed
     $allExecuted += $jsonContent.CommandsExecuted
     $allFiles += $jsonContent.FilesAnalyzed
 
-    # Keep track of coverage targets to pick the highest
+    # Keep track of coverage targets so we can pick the highest
     $allTargets += $jsonContent.CoveragePercentTarget
 }
 
