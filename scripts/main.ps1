@@ -131,13 +131,13 @@ $markdown = Heading 1 'Code Coverage Report' {
 
         Details 'Missed commands' {
             Table {
-                $codeCoverage.CommandsMissed | Format-Table -AutoSize
+                $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | Format-Table -AutoSize
             }
         }
 
         Details 'Executed commands' {
             Table {
-                $codeCoverage.CommandsExecuted | Format-Table -AutoSize
+                $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | Format-Table -AutoSize
             }
         }
 
