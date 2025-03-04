@@ -134,36 +134,47 @@ LogGroup 'Create Step summary' {
     # Build HTML table for 'missed' commands
     $missedHtml = @'
 <table>
-  <thead>
-    <tr>
-      <th>File</th>
-      <th>Line</th>
-      <th>StartColumn</th>
-      <th>EndColumn</th>
-      <th>Class</th>
-      <th>Function</th>
-      <th>Command</th>
-    </tr>
-  </thead>
-  <tbody>
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Line</th>
+            <th>StartColumn</th>
+            <th>EndColumn</th>
+            <th>Class</th>
+            <th>Function</th>
+            <th>Command</th>
+        </tr>
+    </thead>
+    <tbody>
+
 '@
 
     foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
         $escapedCommand = [System.Web.HttpUtility]::HtmlEncode($item.Command)
-        $missedHtml += "<tr>
-      <td>$($item.File)</td>
-      <td>$($item.Line)</td>
-      <td>$($item.StartColumn)</td>
-      <td>$($item.EndColumn)</td>
-      <td>$($item.Class)</td>
-      <td>$($item.Function)</td>
-      <td><pre><code class='language-pwsh'>$escapedCommand</code></pre></td>
-    </tr>"
+        $missedHtml += @"
+        <tr>
+            <td>$($item.File)</td>
+            <td>$($item.Line)</td>
+            <td>$($item.StartColumn)</td>
+            <td>$($item.EndColumn)</td>
+            <td>$($item.Class)</td>
+            <td>$($item.Function)</td>
+            <td>
+                <pre>
+                    <code class='language-pwsh'>
+                        $escapedCommand
+                    </code>
+                </pre>
+            </td>
+        </tr>
+
+"@
     }
 
     $missedHtml += @'
-  </tbody>
+    </tbody>
 </table>
+
 '@
 
     $missedForDisplay = $missedHtml
@@ -171,35 +182,45 @@ LogGroup 'Create Step summary' {
     # Build HTML table for 'executed' commands
     $executedHtml = @'
 <table>
-  <thead>
-    <tr>
-      <th>File</th>
-      <th>Line</th>
-      <th>StartColumn</th>
-      <th>EndColumn</th>
-      <th>Class</th>
-      <th>Function</th>
-      <th>Command</th>
-    </tr>
-  </thead>
-  <tbody>
+    <thead>
+        <tr>
+            <th>File</th>
+            <th>Line</th>
+            <th>StartColumn</th>
+            <th>EndColumn</th>
+            <th>Class</th>
+            <th>Function</th>
+            <th>Command</th>
+        </tr>
+    </thead>
+    <tbody>
+
 '@
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
         $escapedCommand = [System.Web.HttpUtility]::HtmlEncode($item.Command)
-        $executedHtml += "<tr>
-      <td>$($item.File)</td>
-      <td>$($item.Line)</td>
-      <td>$($item.StartColumn)</td>
-      <td>$($item.EndColumn)</td>
-      <td>$($item.Class)</td>
-      <td>$($item.Function)</td>
-      <td><pre><code class='language-pwsh'>$escapedCommand</code></pre></td>
-    </tr>"
+        $executedHtml += @"
+        <tr>
+            <td>$($item.File)</td>
+            <td>$($item.Line)</td>
+            <td>$($item.StartColumn)</td>
+            <td>$($item.EndColumn)</td>
+            <td>$($item.Class)</td>
+            <td>$($item.Function)</td>
+            <td>
+                <pre>
+                    <code class='language-pwsh'>
+                        $escapedCommand
+                    </code>
+                </pre>
+            </td>
+        </tr>
+
+"@
     }
 
     $executedHtml += @'
-  </tbody>
+    </tbody>
 </table>
 '@
 
