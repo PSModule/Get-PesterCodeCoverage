@@ -178,5 +178,9 @@ Set-GitHubStepSummary -Summary $markdown
 
 # -- Throw an error if coverage is below target --
 if ($coveragePercent -lt $coveragePercentTarget) {
-    throw "Coverage is below target! Found $coveragePercent%, target is $coveragePercentTarget%."
+    Write-GitHubError "Coverage is below target! Found $coveragePercent%, target is $coveragePercentTarget%."
+    exit 1
 }
+
+Write-GitHubNotice "Coverage is above target! Found $coveragePercent%, target is $coveragePercentTarget%."
+exit 0
