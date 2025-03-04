@@ -152,19 +152,19 @@ $markdown = Heading 1 'Code Coverage Report' {
             $stats
         }
 
-        Details 'Missed commands' {
+        Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
             Table {
                 $codeCoverage.CommandsMissed | Sort-Object -Property File, Line
             }
         }
 
-        Details 'Executed commands' {
+        Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
             Table {
                 $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line
             }
         }
 
-        Details 'Files analyzed' {
+        Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
             Table {
                 $codeCoverage.FilesAnalyzed
             }
