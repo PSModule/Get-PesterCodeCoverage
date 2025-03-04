@@ -154,19 +154,19 @@ $markdown = Heading 1 'Code Coverage Report' {
 
         Details 'Missed commands' {
             Table {
-                $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | Format-Table -AutoSize
+                $codeCoverage.CommandsMissed | Sort-Object -Property File, Line
             }
         }
 
         Details 'Executed commands' {
             Table {
-                $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | Format-Table -AutoSize
+                $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line
             }
         }
 
         Details 'Files analyzed' {
             Table {
-                $codeCoverage.FilesAnalyzed | Format-Table -AutoSize
+                $codeCoverage.FilesAnalyzed
             }
         }
     }
