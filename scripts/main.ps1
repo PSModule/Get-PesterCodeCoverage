@@ -89,11 +89,49 @@ $codeCoverage = [PSCustomObject]@{
     FilesAnalyzedCount    = [Int64]$finalFiles.Count
 }
 
-# Output the final coverage object to logs
-$codeCoverage | Format-List -Force | Out-String
+#Print stats:
+$codeCoverage | Select-Object -ExcludeProperty CommandsMissed, CommandsExecuted, FilesAnalyzed | Format-List | Out-String
 
-#TODO: Add a markdown report
-#   TODO: Output the markdown to step summary
+# Output the final coverage object to logs
+LogGroup "Missed commands" {
+    $codeCoverage.CommandsMissed | Format-Table -AutoSize | Out-String
+}
+
+LogGroup "Executed commands" {
+    $codeCoverage.CommandsExecuted | Format-Table -AutoSize | Out-String
+}
+
+LogGroup "Files analyzed" {
+    $codeCoverage.FilesAnalyzed | Format-Table -AutoSize | Out-String
+}
+
+# -- Output the markdown to GitHub step summary --
+$markdown = Header "Code Coverage Report" {
+    Table {
+        $codeCoverage | Select-Object -ExcludeProperty CommandsMissed, CommandsExecuted, FilesAnalyzed
+    }
+
+    Details "Missed commands" {
+        Table {
+            $codeCoverage.CommandsMissed | Format-Table -AutoSize
+        }
+    }
+
+    Details "Executed commands" {
+        Table {
+            $codeCoverage.CommandsExecuted | Format-Table -AutoSize
+        }
+    }
+
+    Details "Files analyzed" {
+        Table {
+            $codeCoverage.FilesAnalyzed | Format-Table -AutoSize
+        }
+    }
+}
+
+Set-GitHubStepSummary -Summary $markdown
+
 #   TODO: Output the markdown to PR comment
 
 #TODO: Generate a JSON coverage report and upload it as an artifact
