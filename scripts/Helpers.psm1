@@ -1,4 +1,4 @@
-﻿function Convert-ToRelativePath {
+﻿function ConvertTo-RelativePath {
     param(
         [Parameter(Mandatory)]
         [string]$Path

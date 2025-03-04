@@ -39,21 +39,21 @@ foreach ($file in $files) {
     # 1. Normalize every "File" property in CommandsMissed
     foreach ($missed in $jsonContent.CommandsMissed) {
         if ($missed.File) {
-            $missed.File = Convert-ToRelativePath $missed.File
+            $missed.File = ConvertTo-RelativePath $missed.File
         }
     }
 
     # 2. Normalize every "File" property in CommandsExecuted
     foreach ($exec in $jsonContent.CommandsExecuted) {
         if ($exec.File) {
-            $exec.File = Convert-ToRelativePath $exec.File
+            $exec.File = ConvertTo-RelativePath $exec.File
         }
     }
 
     # 3. Normalize the file paths in FilesAnalyzed
     $normalizedFiles = @()
     foreach ($fa in $jsonContent.FilesAnalyzed) {
-        $normalizedFiles += Convert-ToRelativePath $fa
+        $normalizedFiles += ConvertTo-RelativePath $fa
     }
     $jsonContent.FilesAnalyzed = $normalizedFiles
 
@@ -72,9 +72,7 @@ $finalExecuted = $allExecuted |
     Sort-Object -Property File, Line, Command, StartColumn, EndColumn, Class, Function -Unique
 
 # Normalize them to paths relative to outputs/module
-$finalFiles = $allFiles | ForEach-Object {
-    ($_ -replace '(?i)^.*outputs[\\/]+module[\\/]+', '') -replace '\\', '/'
-} | Sort-Object -Unique
+$finalFiles = $allFiles | Sort-Object -Unique
 
 # -- Remove from missed any command that shows up in executed --
 # Build "keys" for each unique executed command
@@ -133,11 +131,11 @@ $stats | Format-List | Out-String
 
 # Output the final coverage object to logs
 LogGroup 'Missed commands' {
-    $codeCoverage.CommandsMissed | Format-Table -AutoSize | Out-String
+    $codeCoverage.CommandsMissed | Format-List | Out-String
 }
 
 LogGroup 'Executed commands' {
-    $codeCoverage.CommandsExecuted | Format-Table -AutoSize | Out-String
+    $codeCoverage.CommandsExecuted | Format-List | Out-String
 }
 
 LogGroup 'Files analyzed' {
@@ -166,7 +164,7 @@ $markdown = Heading 1 'Code Coverage Report' {
 
         Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
             Table {
-                $codeCoverage.FilesAnalyzed
+                $codeCoverage | Select-Object -Property FilesAnalyzed
             }
         }
     }
