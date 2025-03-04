@@ -3,6 +3,14 @@
 [CmdletBinding()]
 param()
 
+LogGroup 'Init - Setup prerequisites' {
+    'Markdown' | ForEach-Object {
+        Write-Output "Installing module: $_"
+        Install-PSResource -Name $_ -WarningAction SilentlyContinue -TrustRepository -Repository PSGallery
+        Import-Module -Name $_
+    }
+}
+
 $PSStyle.OutputRendering = 'Ansi'
 $repo = $env:GITHUB_REPOSITORY
 $runId = $env:GITHUB_RUN_ID
@@ -90,40 +98,48 @@ $codeCoverage = [PSCustomObject]@{
 }
 
 #Print stats:
-$codeCoverage | Select-Object -ExcludeProperty CommandsMissed, CommandsExecuted, FilesAnalyzed | Format-List | Out-String
+$stats = [pscustomobject]@{
+    Coverage = "$($codeCoverage.CoveragePercent)% / $($codeCoverage.CoveragePercentTarget)%"
+    Analyzed = "$($codeCoverage.CommandsAnalyzedCount) commands"
+    Executed = "$($codeCoverage.CommandsExecutedCount) commands"
+    Missed   = "$($codeCoverage.CommandsMissedCount) commands"
+    Files    = "$($codeCoverage.FilesAnalyzedCount) files"
+}
+
+$stats | Format-List | Out-String
 
 # Output the final coverage object to logs
-LogGroup "Missed commands" {
+LogGroup 'Missed commands' {
     $codeCoverage.CommandsMissed | Format-Table -AutoSize | Out-String
 }
 
-LogGroup "Executed commands" {
+LogGroup 'Executed commands' {
     $codeCoverage.CommandsExecuted | Format-Table -AutoSize | Out-String
 }
 
-LogGroup "Files analyzed" {
+LogGroup 'Files analyzed' {
     $codeCoverage.FilesAnalyzed | Format-Table -AutoSize | Out-String
 }
 
 # -- Output the markdown to GitHub step summary --
-$markdown = Header "Code Coverage Report" {
+$markdown = Heading 'Code Coverage Report' {
     Table {
-        $codeCoverage | Select-Object -ExcludeProperty CommandsMissed, CommandsExecuted, FilesAnalyzed
+        $stats
     }
 
-    Details "Missed commands" {
+    Details 'Missed commands' {
         Table {
             $codeCoverage.CommandsMissed | Format-Table -AutoSize
         }
     }
 
-    Details "Executed commands" {
+    Details 'Executed commands' {
         Table {
             $codeCoverage.CommandsExecuted | Format-Table -AutoSize
         }
     }
 
-    Details "Files analyzed" {
+    Details 'Files analyzed' {
         Table {
             $codeCoverage.FilesAnalyzed | Format-Table -AutoSize
         }
