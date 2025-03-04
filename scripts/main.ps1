@@ -14,87 +14,91 @@ LogGroup 'List files' {
     $files.Name | Out-String
 }
 
-$codeCoverage = [System.Collections.Generic.List[psobject]]::new()
+# Accumulators for coverage items across all files
+$allMissed = @()
+$allExecuted = @()
+$allFiles = @()
+$allTargets = @()
+
 foreach ($file in $files) {
-    $fileName = $file.BaseName
-    $content = Get-Content -Path $file
-    $object = $content | ConvertFrom-Json
-    $codeCoverage.Add($object)
+    Write-Verbose "Processing file: $($file.FullName)"
 
-    $logGroupName = $fileName.Replace('-CodeCoverage-Report', '')
-    LogGroup " - $logGroupName" {
-        $object | Format-List | Out-String
-    }
+    # Convert each JSON file into an object
+    $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
+
+    # Accumulate coverage items
+    $allMissed += $jsonContent.CommandsMissed
+    $allExecuted += $jsonContent.CommandsExecuted
+    $allFiles += $jsonContent.FilesAnalyzed
+
+    # Keep track of coverage targets to pick the highest
+    $allTargets += $jsonContent.CoveragePercentTarget
 }
-Write-Output ('─' * 50)
-LogGroup ' - Summary' {
-    $codeCoverage | Format-List | Out-String
+
+# -- Remove duplicates from each set --
+# Adjust these properties as necessary for your "unique" definition:
+$finalExecuted = $allExecuted |
+    Sort-Object -Property File, Line, Command, StartColumn, EndColumn, Class, Function -Unique
+
+# Normalize them to paths relative to outputs/module
+$finalFiles = $allFiles | ForEach-Object {
+    ($_ -replace '(?i)^.*outputs[\\/]+module[\\/]+', '') -replace '\\', '/'
+} | Sort-Object -Unique
+
+# -- Remove from missed any command that shows up in executed --
+# Build "keys" for each unique executed command
+$executedKeys = $finalExecuted | ForEach-Object {
+    '{0}|{1}|{2}|{3}|{4}|{5}|{6}' -f $_.File, $_.Line, $_.Command, $_.StartColumn, $_.EndColumn, $_.Class, $_.Function
+}
+# Filter out commands from $allMissed that are in $executedKeys
+$finalMissed = $allMissed | Sort-Object -Property File, Line, Command, StartColumn, EndColumn, Class, Function -Unique | Where-Object {
+    $key = '{0}|{1}|{2}|{3}|{4}|{5}|{6}' -f $_.File, $_.Line, $_.Command, $_.StartColumn, $_.EndColumn, $_.Class, $_.Function
+    $executedKeys -notcontains $key
 }
 
-# # Function to merge counters
-# function Merge-Counters($baseNode, $newNode) {
-#     foreach ($newCounter in $newNode.counter) {
-#         $baseCounter = $baseNode.counter | Where-Object { $_.type -eq $newCounter.type }
-#         if ($baseCounter) {
-#             $baseCounter.missed = [int]$baseCounter.missed + [int]$newCounter.missed
-#             $baseCounter.covered = [int]$baseCounter.covered + [int]$newCounter.covered
-#         } else {
-#             # Import new counter if it doesn't exist
-#             $importedCounter = $mergedReport.ImportNode($newCounter, $true)
-#             $baseNode.AppendChild($importedCounter) | Out-Null
-#         }
-#     }
-# }
+# -- Compute the new coverage percentages --
+#   CoveragePercent = (Count(Executed) / Count(Executed + Missed)) * 100
+#   Use the highest coverage target from all the files
+$missedCount = $finalMissed.Count
+$executedCount = $finalExecuted.Count
+$totalAnalyzed = $missedCount + $executedCount
 
-# # Loop through remaining reports to merge coverage data
-# foreach ($reportPath in $files[1..($files.Count - 1)]) {
-#     [xml]$currentReport = Get-Content -Path $reportPath
+if ($totalAnalyzed -gt 0) {
+    $coveragePercent = [Math]::Round(($executedCount / $totalAnalyzed) * 100, 2)
+} else {
+    $coveragePercent = 0
+}
 
-#     # Merge the top-level counters
-#     Merge-Counters -baseNode $mergedReport.report -newNode $currentReport.report
+$coveragePercentTarget = $allTargets | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+if (-not $coveragePercentTarget) {
+    # If no coverage targets were found in the files, default to 0 or whatever you choose
+    $coveragePercentTarget = 0
+}
 
-#     # Merge packages and classes
-#     foreach ($package in $currentReport.report.package) {
-#         $basePackage = $mergedReport.report.package | Where-Object { $_.name -eq $package.name }
+# -- Build final coverage object with the specified fields --
+$codeCoverage = [PSCustomObject]@{
+    CommandsMissed        = $finalMissed
+    CommandsExecuted      = $finalExecuted
+    FilesAnalyzed         = $finalFiles
+    CoveragePercent       = $coveragePercent
+    CoveragePercentTarget = $coveragePercentTarget
+    CoverageReport        = ''  # "Ignore this; can be generated later"
+    CommandsAnalyzedCount = [Int64]$totalAnalyzed
+    CommandsExecutedCount = [Int64]$executedCount
+    CommandsMissedCount   = [Int64]$missedCount
+    FilesAnalyzedCount    = [Int64]$finalFiles.Count
+}
 
-#         if ($basePackage) {
-#             # Merge counters at package level
-#             Merge-Counters -baseNode $basePackage -newNode $package
+# Output the final coverage object to logs
+$codeCoverage | Format-List -Force | Out-String
 
-#             foreach ($class in $package.class) {
-#                 $baseClass = $basePackage.class | Where-Object { $_.name -eq $class.name }
-#                 if ($baseClass) {
-#                     # Merge counters at class level
-#                     Merge-Counters -baseNode $baseClass -newNode $class
-#                 } else {
-#                     # Import new class
-#                     $importedClass = $mergedReport.ImportNode($class, $true)
-#                     $basePackage.AppendChild($importedClass) | Out-Null
-#                 }
-#             }
-#         } else {
-#             # Import entire new package
-#             $importedPackage = $mergedReport.ImportNode($package, $true)
-#             $mergedReport.report.AppendChild($importedPackage) | Out-Null
-#         }
-#     }
-# }
+#TODO: Add a markdown report
+#   TODO: Output the markdown to step summary
+#   TODO: Output the markdown to PR comment
 
-# # Output the combined report
-# $mergedReport.Save('merged-jacoco-report.xml')
+#TODO: Generate a JSON coverage report and upload it as an artifact
 
-# # Assuming $mergedReport is your final [xml] object:
-# $xmlString = $mergedReport.OuterXml
-
-# # To format (pretty-print) the XML nicely:
-# $stringWriter = New-Object System.IO.StringWriter
-# $xmlWriter = [System.Xml.XmlTextWriter]::new($stringWriter)
-# $xmlWriter.Formatting = 'Indented'
-# $mergedReport.WriteTo($xmlWriter)
-# $xmlWriter.Flush()
-# $prettyXml = $stringWriter.ToString()
-
-# $prettyXml | Out-String
-
-# # Output or export the XML string
-# # $prettyXml | Out-File -FilePath "merged-jacoco-report.xml" -Encoding UTF8
+# -- Throw an error if coverage is below target --
+if ($coveragePercent -lt $coveragePercentTarget) {
+    throw "Coverage is below target! Found $coveragePercent%, target is $coveragePercentTarget%."
+}
