@@ -122,26 +122,29 @@ LogGroup 'Files analyzed' {
 }
 
 # -- Output the markdown to GitHub step summary --
-$markdown = Heading 'Code Coverage Report' {
-    Table {
-        $stats
-    }
+$markdown = Heading 1 'Code Coverage Report' {
 
-    Details 'Missed commands' {
+    Heading 2 'Summary' {
         Table {
-            $codeCoverage.CommandsMissed | Format-Table -AutoSize
+            $stats
         }
-    }
 
-    Details 'Executed commands' {
-        Table {
-            $codeCoverage.CommandsExecuted | Format-Table -AutoSize
+        Details 'Missed commands' {
+            Table {
+                $codeCoverage.CommandsMissed | Format-Table -AutoSize
+            }
         }
-    }
 
-    Details 'Files analyzed' {
-        Table {
-            $codeCoverage.FilesAnalyzed | Format-Table -AutoSize
+        Details 'Executed commands' {
+            Table {
+                $codeCoverage.CommandsExecuted | Format-Table -AutoSize
+            }
+        }
+
+        Details 'Files analyzed' {
+            Table {
+                $codeCoverage.FilesAnalyzed | Format-Table -AutoSize
+            }
         }
     }
 }
