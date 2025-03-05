@@ -36,16 +36,21 @@ foreach ($file in $files) {
     $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
 
     # --- Normalize file paths in CommandsMissed, CommandsExecuted, and FilesAnalyzed ---
+    # 1. Normalize every "File" property in CommandsMissed
     foreach ($missed in $jsonContent.CommandsMissed) {
         if ($missed.File) {
             $missed.File = ConvertTo-RelativePath $missed.File
         }
     }
+
+    # 2. Normalize every "File" property in CommandsExecuted
     foreach ($exec in $jsonContent.CommandsExecuted) {
         if ($exec.File) {
             $exec.File = ConvertTo-RelativePath $exec.File
         }
     }
+
+    # 3. Normalize the file paths in FilesAnalyzed
     $normalizedFiles = @()
     foreach ($fa in $jsonContent.FilesAnalyzed) {
         $normalizedFiles += ConvertTo-RelativePath $fa
@@ -130,119 +135,64 @@ LogGroup 'Files analyzed' {
     $codeCoverage.FilesAnalyzed | Format-Table -AutoSize | Out-String
 }
 
-LogGroup 'Create Step summary' {
-    # Build HTML table for 'missed' commands
-    $missedHtml = @'
-<table>
-    <thead>
-        <tr>
-            <th>File</th>
-            <th>Line</th>
-            <th>StartColumn</th>
-            <th>EndColumn</th>
-            <th>Class</th>
-            <th>Function</th>
-            <th>Command</th>
-        </tr>
-    </thead>
-    <tbody>
-
-'@
-
-    foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
-        $missedHtml += @"
-        <tr>
-            <td>$($item.File)</td>
-            <td>$($item.Line)</td>
-            <td>$($item.StartColumn)</td>
-            <td>$($item.EndColumn)</td>
-            <td>$($item.Class)</td>
-            <td>$($item.Function)</td>
-            <td><pre><code class='language-pwsh'>
-                $($item.Command)
-            </code></pre></td>
-        </tr>
-
-"@
+# --------------------------------------------------------------------------------
+# Transform the Command property with markdown code fences before building the table
+# --------------------------------------------------------------------------------
+$missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | ForEach-Object {
+    [PSCustomObject]@{
+        File        = $_.File
+        Line        = $_.Line
+        StartColumn = $_.StartColumn
+        EndColumn   = $_.EndColumn
+        Class       = $_.Class
+        Function    = $_.Function
+        # Wrap the command in triple-backtick code fences with "pwsh"
+        Command     = $_.Command
     }
+}
 
-    $missedHtml += @'
-    </tbody>
-</table>
-
-'@
-
-    $missedForDisplay = $missedHtml
-
-    # Build HTML table for 'executed' commands
-    $executedHtml = @'
-<table>
-    <thead>
-        <tr>
-            <th>File</th>
-            <th>Line</th>
-            <th>StartColumn</th>
-            <th>EndColumn</th>
-            <th>Class</th>
-            <th>Function</th>
-            <th>Command</th>
-        </tr>
-    </thead>
-    <tbody>
-
-'@
-
-    foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
-        $executedHtml += @"
-        <tr>
-            <td>$($item.File)</td>
-            <td>$($item.Line)</td>
-            <td>$($item.StartColumn)</td>
-            <td>$($item.EndColumn)</td>
-            <td>$($item.Class)</td>
-            <td>$($item.Function)</td>
-            <td><pre><code class='language-pwsh'>
-                $($item.Command)
-            </code></pre></td>
-        </tr>
-
-"@
+$executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | ForEach-Object {
+    [PSCustomObject]@{
+        File        = $_.File
+        Line        = $_.Line
+        StartColumn = $_.StartColumn
+        EndColumn   = $_.EndColumn
+        Class       = $_.Class
+        Function    = $_.Function
+        # Wrap the command in triple-backtick code fences with "pwsh"
+        Command     = $_.Command
     }
+}
 
-    $executedHtml += @'
-    </tbody>
-</table>
-'@
+# -- Output the markdown to GitHub step summary --
+$markdown = Heading 1 'Code Coverage Report' {
 
-    $executedForDisplay = $executedHtml
+    Heading 2 'Summary' {
+        Table {
+            $stats
+        }
 
-    # -- Output the HTML tables directly to the GitHub step summary
-    $markdown = Heading 1 'Code Coverage Report' {
-
-        Heading 2 'Summary' {
+        Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
             Table {
-                $stats
-            }
-
-            Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
                 $missedForDisplay
             }
+        }
 
-            Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
+        Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
+            Table {
                 $executedForDisplay
             }
+        }
 
-            Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
-                Table {
-                    $codeCoverage | Select-Object -Property FilesAnalyzed
-                }
+        Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
+            Table {
+                $codeCoverage | Select-Object -Property FilesAnalyzed
             }
         }
     }
-
-    Set-GitHubStepSummary -Summary $markdown
-
 }
+
+Set-GitHubStepSummary -Summary $markdown
 
 # Throw an error if coverage is below target
 if ($coveragePercent -lt $coveragePercentTarget) {
