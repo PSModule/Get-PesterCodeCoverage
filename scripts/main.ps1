@@ -187,17 +187,18 @@ $command
     }
 
     $missedForDisplay += $tablefooter
+    $missedForDisplay
 }
 
 LogGroup 'Set table for executed commands' {
-    $missedForDisplay = $tableheader
+    $executedForDisplay = $tableheader
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
         $command = $item.Command
         # $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
         $command = Normalize-IndentationExceptFirst -Code $command
         # $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-        $missedForDisplay += @"
+        $executedForDisplay += @"
 <tr>
 <td>$($item.File)</td>
 <td>$($item.Line)</td>
@@ -217,7 +218,8 @@ $command
 "@
     }
 
-    $missedForDisplay += $tablefooter
+    $executedForDisplay += $tablefooter
+    $executedForDisplay
 }
 
 LogGroup 'Set step summary' {
@@ -246,6 +248,7 @@ LogGroup 'Set step summary' {
     }
 
     Set-GitHubStepSummary -Summary $markdown
+    $markdown
 }
 
 
