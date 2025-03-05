@@ -139,7 +139,7 @@ LogGroup 'Files analyzed' {
 # Transform the Command property with markdown code fences before building the table
 # --------------------------------------------------------------------------------
 $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | ForEach-Object {
-    $command = '<pre>{0}</pre>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
+    $command = '<pre><code class=''language-pwsh''>{0}</pre></code>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
@@ -153,7 +153,7 @@ $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, L
 }
 
 $executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | ForEach-Object {
-    $command = '<pre>{0}</pre>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
+    $command = '<pre><code class=''language-pwsh''>{0}</pre></code>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
