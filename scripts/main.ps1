@@ -163,9 +163,8 @@ LogGroup 'Set table for missed commands' {
 
     foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
         $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
-        $command = (Normalize-IndentationExceptFirst -Code $_.Command)
-        $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-        $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
+        $command = Normalize-IndentationExceptFirst -Code $command
+        # $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
         $missedForDisplay += @"
 <tr>
 <td>$($item.File)</td>
@@ -194,9 +193,8 @@ LogGroup 'Set table for executed commands' {
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
         $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
-        $command = (Normalize-IndentationExceptFirst -Code $_.Command)
-        $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-        $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
+        $command = Normalize-IndentationExceptFirst -Code $command
+        # $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
         $missedForDisplay += @"
 <tr>
 <td>$($item.File)</td>
