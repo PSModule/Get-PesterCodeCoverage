@@ -141,7 +141,7 @@ LogGroup 'Files analyzed' {
 $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | ForEach-Object {
     $command = (Normalize-IndentationExceptFirst -Code $_.Command)
     $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-    $command = '<pre><code class="language-pwsh">{0}</pre></code>' -f $command
+    $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
@@ -157,7 +157,7 @@ $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, L
 $executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | ForEach-Object {
     $command = (Normalize-IndentationExceptFirst -Code $_.Command)
     $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-    $command = '<pre><code class="language-pwsh">{0}</pre></code>' -f $command
+    $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
