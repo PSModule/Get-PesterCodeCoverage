@@ -73,6 +73,7 @@ function Normalize-IndentationExceptFirst {
         }
     }
 
+    $newLine = '&#10;'
     # Reconstruct the final code: first line + adjusted subsequent lines
-    return ($firstLine + [Environment]::NewLine + ($subsequentLines -join [Environment]::NewLine))
+    return ($firstLine + $newLine + ($subsequentLines -join $newLine))
 }
