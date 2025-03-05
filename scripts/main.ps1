@@ -147,7 +147,7 @@ $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, L
         Class       = $_.Class
         Function    = $_.Function
         # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = $_.Command
+        Command     = ([System.Web.HttpUtility]::HtmlEncode($_.Command)).Replace([Environment]::NewLine, "<br>")
     }
 }
 
@@ -160,7 +160,7 @@ $executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property Fil
         Class       = $_.Class
         Function    = $_.Function
         # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = $_.Command
+        Command     = ([System.Web.HttpUtility]::HtmlEncode($_.Command)).Replace([Environment]::NewLine, "<br>")
     }
 }
 
