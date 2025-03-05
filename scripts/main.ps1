@@ -139,6 +139,7 @@ LogGroup 'Files analyzed' {
 # Transform the Command property with markdown code fences before building the table
 # --------------------------------------------------------------------------------
 $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | ForEach-Object {
+    $command = '<pre>{0}</pre>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
@@ -147,11 +148,12 @@ $missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, L
         Class       = $_.Class
         Function    = $_.Function
         # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, "<br>").Replace(' ', '&nbsp;')
+        Command     = $command
     }
 }
 
 $executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | ForEach-Object {
+    $command = '<pre>{0}</pre>' -f (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;')
     [PSCustomObject]@{
         File        = $_.File
         Line        = $_.Line
@@ -160,7 +162,7 @@ $executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property Fil
         Class       = $_.Class
         Function    = $_.Function
         # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = (Normalize-IndentationExceptFirst -Code $_.Command).Replace([Environment]::NewLine, "<br>").Replace(' ', '&nbsp;')
+        Command     = $command
     }
 }
 
