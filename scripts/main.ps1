@@ -135,70 +135,119 @@ LogGroup 'Files analyzed' {
     $codeCoverage.FilesAnalyzed | Format-Table -AutoSize | Out-String
 }
 
-# --------------------------------------------------------------------------------
-# Transform the Command property with markdown code fences before building the table
-# --------------------------------------------------------------------------------
-$missedForDisplay = $codeCoverage.CommandsMissed | Sort-Object -Property File, Line | ForEach-Object {
-    $command = (Normalize-IndentationExceptFirst -Code $_.Command)
-    $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-    $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
-    [PSCustomObject]@{
-        File        = $_.File
-        Line        = $_.Line
-        StartColumn = $_.StartColumn
-        EndColumn   = $_.EndColumn
-        Class       = $_.Class
-        Function    = $_.Function
-        # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = $command
+# Build HTML table for 'missed' commands
+$tableheader = @'
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Line</th>
+<th>StartColumn</th>
+<th>EndColumn</th>
+<th>Class</th>
+<th>Function</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+'@
+
+$tablefooter = @'
+</tbody>
+</table>
+
+'@
+
+LogGroup 'Set table for missed commands' {
+    $missedForDisplay = $tableheader
+
+    foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
+        $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
+        $command = (Normalize-IndentationExceptFirst -Code $_.Command)
+        $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
+        $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
+        $missedForDisplay += @"
+<tr>
+<td>$($item.File)</td>
+<td>$($item.Line)</td>
+<td>$($item.StartColumn)</td>
+<td>$($item.EndColumn)</td>
+<td>$($item.Class)</td>
+<td>$($item.Function)</td>
+<td>
+
+``````pwsh
+$command
+``````
+
+</td>
+</tr>
+
+"@
     }
+
+    $missedForDisplay += $tablefooter
 }
 
-$executedForDisplay = $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line | ForEach-Object {
-    $command = (Normalize-IndentationExceptFirst -Code $_.Command)
-    $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
-    $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
-    [PSCustomObject]@{
-        File        = $_.File
-        Line        = $_.Line
-        StartColumn = $_.StartColumn
-        EndColumn   = $_.EndColumn
-        Class       = $_.Class
-        Function    = $_.Function
-        # Wrap the command in triple-backtick code fences with "pwsh"
-        Command     = $command
+LogGroup 'Set table for executed commands' {
+    $missedForDisplay = $tableheader
+
+    foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
+        $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
+        $command = (Normalize-IndentationExceptFirst -Code $_.Command)
+        $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
+        $command = '<pre><code class="language-powershell">{0}</pre></code>' -f $command
+        $missedForDisplay += @"
+<tr>
+<td>$($item.File)</td>
+<td>$($item.Line)</td>
+<td>$($item.StartColumn)</td>
+<td>$($item.EndColumn)</td>
+<td>$($item.Class)</td>
+<td>$($item.Function)</td>
+<td>
+
+``````pwsh
+$command
+``````
+
+</td>
+</tr>
+
+"@
     }
+
+    $missedForDisplay += $tablefooter
 }
 
-# -- Output the markdown to GitHub step summary --
-$markdown = Heading 1 'Code Coverage Report' {
+LogGroup 'Set step summary' {
+    # -- Output the markdown to GitHub step summary --
+    $markdown = Heading 1 'Code Coverage Report' {
 
-    Heading 2 'Summary' {
-        Table {
-            $stats
-        }
-
-        Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
+        Heading 2 'Summary' {
             Table {
+                $stats
+            }
+
+            Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
                 $missedForDisplay
             }
-        }
 
-        Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
-            Table {
+            Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
                 $executedForDisplay
             }
-        }
 
-        Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
-            Table {
-                $codeCoverage | Select-Object -Property FilesAnalyzed
+            Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
+                Table {
+                    $codeCoverage | Select-Object -Property FilesAnalyzed
+                }
             }
         }
     }
+
+    Set-GitHubStepSummary -Summary $markdown
 }
 
-Set-GitHubStepSummary -Summary $markdown
 
 # Throw an error if coverage is below target
 if ($coveragePercent -lt $coveragePercentTarget) {
