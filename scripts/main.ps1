@@ -162,6 +162,7 @@ LogGroup 'Set table for missed commands' {
     $missedForDisplay = $tableheader
 
     foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
+        $command = $item.Command
         # $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
         $command = Normalize-IndentationExceptFirst -Code $command
         # $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
@@ -192,6 +193,7 @@ LogGroup 'Set table for executed commands' {
     $missedForDisplay = $tableheader
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
+        $command = $item.Command
         # $command = [System.Web.HttpUtility]::HtmlEncode($item.Command)
         $command = Normalize-IndentationExceptFirst -Code $command
         # $command = $command.Replace([Environment]::NewLine, '<br>').Replace(' ', '&nbsp;').Replace('{', '\{').Replace('}', '\}')
