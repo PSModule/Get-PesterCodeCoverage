@@ -150,7 +150,6 @@ LogGroup 'Create Step summary' {
 '@
 
     foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
-        $escapedCommand = [System.Web.HttpUtility]::HtmlEncode($item.Command)
         $missedHtml += @"
         <tr>
             <td>$($item.File)</td>
@@ -159,13 +158,9 @@ LogGroup 'Create Step summary' {
             <td>$($item.EndColumn)</td>
             <td>$($item.Class)</td>
             <td>$($item.Function)</td>
-            <td>
-                <pre>
-                    <code class='language-pwsh'>
-                        $escapedCommand
-                    </code>
-                </pre>
-            </td>
+            <td><pre><code class='language-pwsh'>
+                $($item.Command)
+            </code></pre></td>
         </tr>
 
 "@
@@ -198,7 +193,6 @@ LogGroup 'Create Step summary' {
 '@
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
-        $escapedCommand = [System.Web.HttpUtility]::HtmlEncode($item.Command)
         $executedHtml += @"
         <tr>
             <td>$($item.File)</td>
@@ -207,13 +201,9 @@ LogGroup 'Create Step summary' {
             <td>$($item.EndColumn)</td>
             <td>$($item.Class)</td>
             <td>$($item.Function)</td>
-            <td>
-                <pre>
-                    <code class='language-pwsh'>
-                        $escapedCommand
-                    </code>
-                </pre>
-            </td>
+            <td><pre><code class='language-pwsh'>
+                $($item.Command)
+            </code></pre></td>
         </tr>
 
 "@
