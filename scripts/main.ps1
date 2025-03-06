@@ -234,8 +234,11 @@ LogGroup 'Set step summary' {
             }
 
             Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
-                Table {
-                    $codeCoverage | Select-Object -Property FilesAnalyzed
+                Paragraph {
+                    $codeCoverage.FilesAnalyzed | ForEach-Object {
+                        $file = ConvertTo-RelativePath $_
+                        Write-Output "- $file"
+                    }
                 }
             }
         }
