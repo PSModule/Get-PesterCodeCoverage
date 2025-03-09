@@ -1,31 +1,4 @@
-﻿function ConvertTo-RelativePath {
-    param(
-        [Parameter(Mandatory)]
-        [string]$Path
-    )
-
-    # 1) Remove everything up to and including "outputs/module/" (case-insensitive),
-    #    allowing either slash or backslash.
-    $relative = $Path -replace '(?i)^.*outputs[\\/]+module[\\/]+', ''
-
-    # 2) Convert all backslashes to forward slashes for consistency
-    $relative = $relative -replace '\\', '/'
-
-    # 3) Remove the *next* folder (the module name) in the path.
-    #    For example, "PSModuleTest/scripts/loader.ps1" => "scripts/loader.ps1"
-    $segments = $relative -split '/'
-    if ($segments.Count -gt 1) {
-        # Skip the first segment (the module name) and rejoin the rest
-        $relative = ($segments[1..($segments.Count - 1)]) -join '/'
-    } else {
-        # If there was only one segment, just keep it (file in the root)
-        $relative = $segments[0]
-    }
-
-    return $relative
-}
-
-function Normalize-IndentationExceptFirst {
+﻿function Normalize-IndentationExceptFirst {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -76,36 +49,4 @@ function Normalize-IndentationExceptFirst {
     $newLine = [Environment]::NewLine
     # Reconstruct the final code: first line + adjusted subsequent lines
     return ($firstLine + $newLine + ($subsequentLines -join $newLine))
-}
-
-
-# Improve path normalization by using PSModulePath
-function ConvertTo-NormalizedModulePath {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [string] $Path
-    )
-
-    process {
-        # Normalize backslashes to forward slashes for consistency
-        $Path = $Path.Replace('\', '/')
-
-        # Get only the first module path and normalize it
-        $modulePath = ($env:PSModulePath -split [IO.Path]::PathSeparator | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-                Select-Object -First 1).TrimEnd('\', '/').Replace('\', '/')
-
-        if ($modulePath -and $Path -match [regex]::Escape($modulePath)) {
-            # Remove the module path prefix
-            $normalizedPath = $Path -replace [regex]::Escape($modulePath), ''
-            # Remove any leading path separators
-            $normalizedPath = $normalizedPath.TrimStart('/')
-
-            # Return with the standard "Modules/" prefix
-            return "Modules/$normalizedPath"
-        }
-
-        # If no match found, just normalize slashes and return the original path
-        return $Path
-    }
 }

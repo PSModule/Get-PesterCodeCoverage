@@ -23,11 +23,6 @@ LogGroup 'List files' {
     $files.Name | Out-String
 }
 
-LogGroup 'Module paths' {
-    Write-Output 'PSModulePath entries:'
-    $env:PSModulePath -split [IO.Path]::PathSeparator | ForEach-Object { "  $_" }
-}
-
 # Accumulators for coverage items across all files
 $allMissed = @()
 $allExecuted = @()
@@ -44,21 +39,21 @@ foreach ($file in $files) {
     # 1. Normalize every "File" property in CommandsMissed
     foreach ($missed in $jsonContent.CommandsMissed) {
         if ($missed.File) {
-            $missed.File = ConvertTo-NormalizedModulePath $missed.File
+            $missed.File = ($missed.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
         }
     }
 
     # 2. Normalize every "File" property in CommandsExecuted
     foreach ($exec in $jsonContent.CommandsExecuted) {
         if ($exec.File) {
-            $exec.File = ConvertTo-NormalizedModulePath $exec.File
+            $exec.File = ($exec.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
         }
     }
 
     # 3. Normalize the file paths in FilesAnalyzed
     $normalizedFiles = @()
     foreach ($fa in $jsonContent.FilesAnalyzed) {
-        $normalizedFiles += ConvertTo-NormalizedModulePath $fa
+        $normalizedFiles += ($fa.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
     }
     $jsonContent.FilesAnalyzed = $normalizedFiles
 
