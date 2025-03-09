@@ -77,3 +77,41 @@ function Normalize-IndentationExceptFirst {
     # Reconstruct the final code: first line + adjusted subsequent lines
     return ($firstLine + $newLine + ($subsequentLines -join $newLine))
 }
+
+
+# Improve path normalization by using PSModulePath
+function ConvertTo-NormalizedModulePath {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, ValueFromPipeline)]
+        [string] $Path
+    )
+
+    process {
+        # Split PSModulePath into individual paths and normalize them
+        $modulePaths = $env:PSModulePath -split [IO.Path]::PathSeparator |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+            ForEach-Object { $_.TrimEnd('\', '/') }
+
+        # Try to match the start of the path with any module path
+        foreach ($modulePath in $modulePaths) {
+            if ($Path -match [regex]::Escape($modulePath)) {
+                $normalizedPath = $Path -replace [regex]::Escape($modulePath), ''
+                # Remove any leading path separators
+                $normalizedPath = $normalizedPath.TrimStart('\', '/')
+
+                # If path was successfully normalized, return it
+                if ($normalizedPath -ne $Path) {
+                    return "Modules/$normalizedPath"
+                }
+            } elseif ($Path -match '(runner|runneradmin)[/\\].*[/\\]Modules[/\\]') {
+                # Handle common GitHub runner paths that might not be in PSModulePath
+                $normalizedPath = $Path -replace '.*?(Modules[/\\])', 'Modules/'
+                return $normalizedPath
+            }
+        }
+
+        # If no module path matched, use the existing relative path function
+        return ConvertTo-RelativePath $Path
+    }
+}
