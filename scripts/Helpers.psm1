@@ -92,8 +92,9 @@ function ConvertTo-NormalizedModulePath {
         $Path = $Path.Replace('\', '/')
 
         # Get only the first module path and normalize it
-        $modulePath = ($env:PSModulePath -split [IO.Path]::PathSeparator | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1).TrimEnd('\', '/').Replace('\', '/')
-        
+        $modulePath = ($env:PSModulePath -split [IO.Path]::PathSeparator | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
+                Select-Object -First 1).TrimEnd('\', '/').Replace('\', '/')
+
         if ($modulePath -and $Path -match [regex]::Escape($modulePath)) {
             # Remove the module path prefix
             $normalizedPath = $Path -replace [regex]::Escape($modulePath), ''
