@@ -88,30 +88,23 @@ function ConvertTo-NormalizedModulePath {
     )
 
     process {
-        # Split PSModulePath into individual paths and normalize them
-        $modulePaths = $env:PSModulePath -split [IO.Path]::PathSeparator |
-            Where-Object { -not [string]::IsNullOrWhiteSpace($_) } |
-            ForEach-Object { $_.TrimEnd('\', '/') }
+        # Normalize backslashes to forward slashes for consistency
+        $Path = $Path.Replace('\', '/')
 
-        # Try to match the start of the path with any module path
-        foreach ($modulePath in $modulePaths) {
-            if ($Path -match [regex]::Escape($modulePath)) {
-                $normalizedPath = $Path -replace [regex]::Escape($modulePath), ''
-                # Remove any leading path separators
-                $normalizedPath = $normalizedPath.TrimStart('\', '/')
+        # Get only the first module path and normalize it
+        $modulePath = ($env:PSModulePath -split [IO.Path]::PathSeparator | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -First 1).TrimEnd('\', '/').Replace('\', '/')
+        
+        if ($modulePath -and $Path -match [regex]::Escape($modulePath)) {
+            # Remove the module path prefix
+            $normalizedPath = $Path -replace [regex]::Escape($modulePath), ''
+            # Remove any leading path separators
+            $normalizedPath = $normalizedPath.TrimStart('/')
 
-                # If path was successfully normalized, return it
-                if ($normalizedPath -ne $Path) {
-                    return "Modules/$normalizedPath"
-                }
-            } elseif ($Path -match '(runner|runneradmin)[/\\].*[/\\]Modules[/\\]') {
-                # Handle common GitHub runner paths that might not be in PSModulePath
-                $normalizedPath = $Path -replace '.*?(Modules[/\\])', 'Modules/'
-                return $normalizedPath
-            }
+            # Return with the standard "Modules/" prefix
+            return "Modules/$normalizedPath"
         }
 
-        # If no module path matched, use the existing relative path function
-        return ConvertTo-RelativePath $Path
+        # If no match found, just normalize slashes and return the original path
+        return $Path
     }
 }

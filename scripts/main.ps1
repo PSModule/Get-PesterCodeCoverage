@@ -24,7 +24,7 @@ LogGroup 'List files' {
 }
 
 LogGroup 'Module paths' {
-    Write-Output "PSModulePath entries:"
+    Write-Output 'PSModulePath entries:'
     $env:PSModulePath -split [IO.Path]::PathSeparator | ForEach-Object { "  $_" }
 }
 
