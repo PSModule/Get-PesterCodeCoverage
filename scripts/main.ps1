@@ -53,7 +53,7 @@ foreach ($file in $files) {
     # 3. Normalize the file paths in FilesAnalyzed
     $normalizedFiles = @()
     foreach ($fa in $jsonContent.FilesAnalyzed) {
-        $normalizedFiles += ($fa.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+        $normalizedFiles += ($fa -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
     }
     $jsonContent.FilesAnalyzed = $normalizedFiles
 
@@ -236,8 +236,7 @@ LogGroup 'Set step summary' {
             Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
                 Paragraph {
                     $codeCoverage.FilesAnalyzed | ForEach-Object {
-                        $file = ConvertTo-RelativePath $_
-                        Write-Output "- $file"
+                        Write-Output "- $_"
                     }
                 }
             }
