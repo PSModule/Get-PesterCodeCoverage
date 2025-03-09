@@ -67,6 +67,7 @@ foreach ($file in $files) {
 
     # 3. Normalize the file paths in FilesAnalyzed
     $normalizedFiles = @()
+    $jsonContent.FilesAnalyzed = $jsonContent.FilesAnalyzed | Sort-Object -Unique
     foreach ($fa in $jsonContent.FilesAnalyzed) {
         $normalizedFiles += ($fa -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
     }
