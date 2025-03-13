@@ -34,6 +34,10 @@ $codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' 
 gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
 $files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json | Sort-Object Name
 
+LogGroup 'List files' {
+    $files.Name | Out-String
+}
+
 # Accumulators for coverage items across all files
 $allMissed = @()
 $allExecuted = @()
@@ -41,7 +45,8 @@ $allFiles = @()
 $allTargets = @()
 
 foreach ($file in $files) {
-    LogGroup " - $($file.BaseName)" {
+    $groupName = $file.BaseName.Replace('-CodeCoverage-Report')
+    LogGroup " - $groupName" {
         Write-Verbose "Processing file: $($file.FullName)"
 
         # Convert each JSON file into an object
