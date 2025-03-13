@@ -45,7 +45,7 @@ $allFiles = @()
 $allTargets = @()
 
 foreach ($file in $files) {
-    $groupName = $file.BaseName.Replace('-CodeCoverage-Report')
+    $groupName = $file.BaseName.Replace('-CodeCoverage-Report', '')
     LogGroup " - $groupName" {
         Write-Verbose "Processing file: $($file.FullName)"
 
