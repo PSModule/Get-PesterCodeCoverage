@@ -41,7 +41,7 @@ $allFiles = @()
 $allTargets = @()
 
 foreach ($file in $files) {
-    LogGroup " - $($file.Name)" {
+    LogGroup " - $($file.BaseName)" {
         Write-Verbose "Processing file: $($file.FullName)"
 
         # Convert each JSON file into an object
