@@ -34,10 +34,6 @@ $codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' 
 gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
 $files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json | Sort-Object Name
 
-LogGroup 'List files' {
-    $files.Name | Out-String
-}
-
 # Accumulators for coverage items across all files
 $allMissed = @()
 $allExecuted = @()
@@ -45,39 +41,49 @@ $allFiles = @()
 $allTargets = @()
 
 foreach ($file in $files) {
-    Write-Verbose "Processing file: $($file.FullName)"
+    LogGroup " - $($file.Name)" {
+        Write-Verbose "Processing file: $($file.FullName)"
 
-    # Convert each JSON file into an object
-    $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
+        # Convert each JSON file into an object
+        $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
 
-    # --- Normalize file paths in CommandsMissed, CommandsExecuted, and FilesAnalyzed ---
-    # 1. Normalize every "File" property in CommandsMissed
-    foreach ($missed in $jsonContent.CommandsMissed) {
-        if ($missed.File) {
-            $missed.File = ($missed.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+        [pscustomobject]@{
+            Coverage = "$($jsonContent.CoveragePercent)% / $($jsonContent.CoveragePercentTarget)%"
+            Analyzed = "$($jsonContent.CommandsAnalyzedCount) commands"
+            Executed = "$($jsonContent.CommandsExecutedCount) commands"
+            Missed   = "$($jsonContent.CommandsMissedCount) commands"
+            Files    = "$($jsonContent.FilesAnalyzedCount) files"
+        } | Format-Table -AutoSize | Out-String
+        
+        # --- Normalize file paths in CommandsMissed, CommandsExecuted, and FilesAnalyzed ---
+        # 1. Normalize every "File" property in CommandsMissed
+        foreach ($missed in $jsonContent.CommandsMissed) {
+            if ($missed.File) {
+                $missed.File = ($missed.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+            }
         }
-    }
 
-    # 2. Normalize every "File" property in CommandsExecuted
-    foreach ($exec in $jsonContent.CommandsExecuted) {
-        if ($exec.File) {
-            $exec.File = ($exec.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+        # 2. Normalize every "File" property in CommandsExecuted
+        foreach ($exec in $jsonContent.CommandsExecuted) {
+            if ($exec.File) {
+                $exec.File = ($exec.File -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+            }
         }
-    }
 
-    # 3. Normalize the file paths in FilesAnalyzed
-    $normalizedFiles = @()
-    $jsonContent.FilesAnalyzed = $jsonContent.FilesAnalyzed | Sort-Object -Unique
-    foreach ($fa in $jsonContent.FilesAnalyzed) {
-        $normalizedFiles += ($fa -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
-    }
-    $jsonContent.FilesAnalyzed = $normalizedFiles
+        # 3. Normalize the file paths in FilesAnalyzed
+        $normalizedFiles = @()
+        $jsonContent.FilesAnalyzed = $jsonContent.FilesAnalyzed | Sort-Object -Unique
+        foreach ($fa in $jsonContent.FilesAnalyzed) {
+            $normalizedFiles += ($fa -Split '999.0.0')[-1].Replace('\', '/').TrimStart('/').TrimEnd('/')
+        }
+        $jsonContent.FilesAnalyzed = $normalizedFiles
 
-    # Now accumulate coverage items
-    $allMissed += $jsonContent.CommandsMissed
-    $allExecuted += $jsonContent.CommandsExecuted
-    $allFiles += $jsonContent.FilesAnalyzed
-    $allTargets += $jsonContent.CoveragePercentTarget
+        # Now accumulate coverage items
+        $allMissed += $jsonContent.CommandsMissed
+        $allExecuted += $jsonContent.CommandsExecuted
+        $allFiles += $jsonContent.FilesAnalyzed
+        $allTargets += $jsonContent.CoveragePercentTarget
+    }
 }
 
 # -- Remove duplicates from each set --
@@ -136,20 +142,7 @@ $stats = [pscustomobject]@{
     Files    = "$($codeCoverage.FilesAnalyzedCount) files"
 }
 
-$stats | Format-List | Out-String
-
-# Output the final coverage object to logs
-LogGroup 'Missed commands' {
-    $codeCoverage.CommandsMissed | Format-List | Out-String
-}
-
-LogGroup 'Executed commands' {
-    $codeCoverage.CommandsExecuted | Format-List | Out-String
-}
-
-LogGroup 'Files analyzed' {
-    $codeCoverage.FilesAnalyzed | Format-Table -AutoSize | Out-String
-}
+$stats | Format-Table -AutoSize | Out-String
 
 # Build HTML table for 'missed' commands
 $tableheader = @'
@@ -200,7 +193,6 @@ $command
     }
 
     $missedForDisplay += $tablefooter
-    $missedForDisplay
 }
 
 LogGroup 'Set table for executed commands' {
@@ -229,7 +221,6 @@ $command
     }
 
     $executedForDisplay += $tablefooter
-    $executedForDisplay
 }
 
 LogGroup 'Set step summary' {
