@@ -233,6 +233,39 @@ $command
 }
 
 LogGroup 'Set step summary' {
+    # Get the step summary mode from the environment variable
+    $stepSummaryMode = $env:PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode
+    if ([string]::IsNullOrEmpty($stepSummaryMode)) {
+        $stepSummaryMode = 'Full'
+    }
+
+    Write-Verbose "Step Summary Mode: $stepSummaryMode"
+
+    # If mode is 'None', skip step summary generation completely
+    if ($stepSummaryMode -eq 'None') {
+        Write-Verbose 'Step summary is disabled'
+        return
+    }
+
+    # Define which sections to include
+    $includeMissed = $false
+    $includeExecuted = $false
+    $includeFiles = $false
+
+    if ($stepSummaryMode -eq 'Full') {
+        # Include all sections
+        $includeMissed = $true
+        $includeExecuted = $true
+        $includeFiles = $true
+    } else {
+        # Parse comma-separated list
+        $sections = $stepSummaryMode -split ',' | ForEach-Object { $_.Trim() }
+
+        $includeMissed = $sections -contains 'Missed'
+        $includeExecuted = $sections -contains 'Executed'
+        $includeFiles = $sections -contains 'Files'
+    }
+
     # -- Output the markdown to GitHub step summary --
     $markdown = Heading 1 'Code Coverage Report' {
 
@@ -241,18 +274,24 @@ LogGroup 'Set step summary' {
                 $stats
             }
 
-            Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
-                $missedForDisplay
+            if ($includeMissed) {
+                Details "Missed commands [$($codeCoverage.CommandsMissedCount)]" {
+                    $missedForDisplay
+                }
             }
 
-            Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
-                $executedForDisplay
+            if ($includeExecuted) {
+                Details "Executed commands [$($codeCoverage.CommandsExecutedCount)]" {
+                    $executedForDisplay
+                }
             }
 
-            Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
-                Paragraph {
-                    $codeCoverage.FilesAnalyzed | ForEach-Object {
-                        Write-Output "- $_"
+            if ($includeFiles) {
+                Details "Files analyzed [$($codeCoverage.FilesAnalyzedCount)]" {
+                    Paragraph {
+                        $codeCoverage.FilesAnalyzed | ForEach-Object {
+                            Write-Output "- $_"
+                        }
                     }
                 }
             }
