@@ -54,7 +54,7 @@ foreach ($file in $files) {
             Missed   = "$($jsonContent.CommandsMissedCount) commands"
             Files    = "$($jsonContent.FilesAnalyzedCount) files"
         } | Format-Table -AutoSize | Out-String
-        
+
         # --- Normalize file paths in CommandsMissed, CommandsExecuted, and FilesAnalyzed ---
         # 1. Normalize every "File" property in CommandsMissed
         foreach ($missed in $jsonContent.CommandsMissed) {
