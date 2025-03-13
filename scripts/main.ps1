@@ -48,7 +48,8 @@ foreach ($file in $files) {
         $jsonContent = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
 
         [pscustomobject]@{
-            Coverage = "$($jsonContent.CoveragePercent)% / $($jsonContent.CoveragePercentTarget)%"
+            Coverage = "$([Math]::Round($jsonContent.CoveragePercent, 2))%"
+            Target   = "$([Math]::Round($jsonContent.CoveragePercentTarget, 2))%"
             Analyzed = "$($jsonContent.CommandsAnalyzedCount) commands"
             Executed = "$($jsonContent.CommandsExecutedCount) commands"
             Missed   = "$($jsonContent.CommandsMissedCount) commands"
@@ -135,7 +136,8 @@ $codeCoverage = [PSCustomObject]@{
 
 # Print stats:
 $stats = [pscustomobject]@{
-    Coverage = "$($codeCoverage.CoveragePercent)% / $($codeCoverage.CoveragePercentTarget)%"
+    Coverage = "$([Math]::Round($codeCoverage.CoveragePercent, 2))%"
+    Target   = "$([Math]::Round($codeCoverage.CoveragePercentTarget, 2))%"
     Analyzed = "$($codeCoverage.CommandsAnalyzedCount) commands"
     Executed = "$($codeCoverage.CommandsExecutedCount) commands"
     Missed   = "$($codeCoverage.CommandsMissedCount) commands"
@@ -290,7 +292,6 @@ LogGroup 'Set step summary' {
     }
 
     Set-GitHubStepSummary -Summary $markdown
-    $markdown
 }
 
 
