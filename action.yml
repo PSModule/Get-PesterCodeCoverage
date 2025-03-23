@@ -29,6 +29,8 @@ inputs:
     description: Controls which sections to show in the GitHub step summary. Use 'Full' for all sections, 'None' to disable, or a comma-separated list of 'Missed,Executed,Files'.
     required: false
     default: Missed, Files
+  CodeCoveragePercentTarget:
+    description: The target for code coverage.
 
 runs:
   using: composite
@@ -37,6 +39,7 @@ runs:
       uses: PSModule/GitHub-Script@v1
       env:
         PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
+        PSMODULE_GET_PESTERCODECOVERAGE_INPUT_CodeCoveragePercentTarget: ${{ inputs.CodeCoveragePercentTarget }}
       with:
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}

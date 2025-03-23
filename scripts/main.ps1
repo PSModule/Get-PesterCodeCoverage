@@ -120,9 +120,14 @@ if ($totalAnalyzed -gt 0) {
     $coveragePercent = 0
 }
 
-$coveragePercentTarget = $allTargets | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
-if (-not $coveragePercentTarget) {
-    $coveragePercentTarget = 0
+$CodeCoveragePercentTarget = $env:PSMODULE_GET_PESTERCODECOVERAGE_INPUT_CodeCoveragePercentTarget
+if ($CodeCoveragePercentTarget) {
+    $coveragePercentTarget = $CodeCoveragePercentTarget
+} else {
+    $coveragePercentTarget = $allTargets | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+    if (-not $coveragePercentTarget) {
+        $coveragePercentTarget = 0
+    }
 }
 
 # -- Build final coverage object --
