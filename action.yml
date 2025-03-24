@@ -31,6 +31,7 @@ inputs:
     default: Missed, Files
   CodeCoveragePercentTarget:
     description: The target for code coverage.
+    required: false
 
 runs:
   using: composite
@@ -41,11 +42,10 @@ runs:
         PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_GET_PESTERCODECOVERAGE_INPUT_CodeCoveragePercentTarget: ${{ inputs.CodeCoveragePercentTarget }}
       with:
+        Name: Get-PesterCodeCoverage
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
         WorkingDirectory: ${{ inputs.WorkingDirectory }}
-        Script: |
-          # Get-PesterCodeCoverage
-          ${{ github.action_path }}/scripts/main.ps1
+        Script: ${{ github.action_path }}/scripts/main.ps1
