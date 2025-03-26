@@ -181,7 +181,7 @@ $tablefooter = @'
 
 '@
 
-LogGroup 'Set table for missed commands' {
+LogGroup 'Step Summary - Set table for missed commands' {
     $missedForDisplay = $tableheader
 
     foreach ($item in $codeCoverage.CommandsMissed | Sort-Object -Property File, Line) {
@@ -209,7 +209,7 @@ $command
     $missedForDisplay += $tablefooter
 }
 
-LogGroup 'Set table for executed commands' {
+LogGroup 'Step Summary - Set table for executed commands' {
     $executedForDisplay = $tableheader
 
     foreach ($item in $codeCoverage.CommandsExecuted | Sort-Object -Property File, Line) {
@@ -237,7 +237,7 @@ $command
     $executedForDisplay += $tablefooter
 }
 
-LogGroup 'Set step summary' {
+LogGroup 'Step Summary - Set step summary' {
     # Get the step summary mode from the environment variable
     $stepSummaryMode = $env:PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode
     if ([string]::IsNullOrEmpty($stepSummaryMode)) {
