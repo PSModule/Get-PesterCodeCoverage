@@ -154,6 +154,8 @@ $stats = [pscustomobject]@{
     Files    = "$($codeCoverage.FilesAnalyzedCount) files"
 }
 
+$success = $coveragePercent -ge $coveragePercentTarget
+$statusIcon = $success ? '✅' : '❌'
 $stats | Format-Table -AutoSize | Out-String
 
 # Build HTML table for 'missed' commands
@@ -270,7 +272,7 @@ LogGroup 'Set step summary' {
     }
 
     # -- Output the markdown to GitHub step summary --
-    $markdown = Heading 1 'Code Coverage Report' {
+    $markdown = Heading 1 "$statusIcon Code Coverage Report" {
 
         Heading 2 'Summary' {
             Table {
