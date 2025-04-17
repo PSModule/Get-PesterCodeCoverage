@@ -1,15 +1,11 @@
-name: {{ NAME }}
-description: {{ DESCRIPTION }}
+name: Get-PesterCodeCoverage
+description: A GitHub Action that is used to gather Code Coverage for the PSModule process.
 author: PSModule
 branding:
   icon: upload-cloud
   color: white
 
 inputs:
-  subject:
-    description: The subject to greet
-    required: false
-    default: World
   Debug:
     description: Enable debug output.
     required: false
@@ -28,21 +24,31 @@ inputs:
   WorkingDirectory:
     description: The working directory where the script will run from.
     required: false
-    default: ${{ github.workspace }}
+    default: '.'
+  StepSummary_Mode:
+    description: |
+      Controls which sections to show in the GitHub step summary.
+      Use 'Full' for all sections, 'None' to disable, or a comma-separated list of 'Missed, Executed, Files'.
+    required: false
+    default: Missed, Files
+  CodeCoveragePercentTarget:
+    description: The target for code coverage.
+    required: false
 
 runs:
   using: composite
   steps:
-    - name: {{ NAME }}
+    - name: Get-PesterCodeCoverage
       uses: PSModule/GitHub-Script@v1
       env:
-        {{ ORG }}_{{ NAME }}_INPUT_subject: ${{ inputs.subject }}
+        PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
+        PSMODULE_GET_PESTERCODECOVERAGE_INPUT_CodeCoveragePercentTarget: ${{ inputs.CodeCoveragePercentTarget }}
       with:
+        Name: Get-PesterCodeCoverage
         Debug: ${{ inputs.Debug }}
         Prerelease: ${{ inputs.Prerelease }}
         Verbose: ${{ inputs.Verbose }}
         Version: ${{ inputs.Version }}
         WorkingDirectory: ${{ inputs.WorkingDirectory }}
-        Script: |
-          # {{ NAME }}
-          ${{ github.action_path }}/scripts/main.ps1
+        ShowInfo: false
+        Script: ${{ github.action_path }}/scripts/main.ps1
