@@ -55,7 +55,8 @@ The action generates a detailed summary visible in the GitHub Actions UI:
    - **Analyzed Files**: List of covered files
 
 Example summary:
-```
+
+```markdown
 ✅ Code Coverage Report
 
 Summary:
