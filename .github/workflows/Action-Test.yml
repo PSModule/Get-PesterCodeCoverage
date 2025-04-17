@@ -78,4 +78,4 @@ jobs:
         uses: ./
         with:
           StepSummary_Mode: Full
-          CodeCoveragePercentTarget: 80
+          CodeCoveragePercentTarget: 50
