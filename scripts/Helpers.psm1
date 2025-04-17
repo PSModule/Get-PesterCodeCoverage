@@ -1,19 +1,20 @@
 ﻿function Normalize-IndentationExceptFirst {
-    [OutputType([string])]
     <#
-        .SYNOPSIS
-        Normalizes the indentation of a multi-line string, except for the first line.
+    .SYNOPSIS
+    Normalizes the indentation of a multi-line string, except for the first line.
 
-        .DESCRIPTION
-        This function takes a multi-line string and normalizes the indentation of all lines except the first one.
-        It removes the minimum leading whitespace from all subsequent lines.
+    .DESCRIPTION
+    This function takes a multi-line string and normalizes the indentation of all lines except the first one.
+    It removes the minimum leading whitespace from all subsequent lines.
 
-        .PARAMETER Code
-        The multi-line string to normalize.
+    .PARAMETER Code
+    The multi-line string to normalize.
 
-        .OUTPUTS
-        Returns the normalized multi-line string.
+    .OUTPUTS
+    Returns the normalized multi-line string.
     s#>
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseApprovedVerbs', '', Scope = 'Function', Justification = 'Function isnt exported.')]
+    [OutputType([string])]
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
