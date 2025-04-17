@@ -27,12 +27,12 @@ LogGroup 'Init - Setup prerequisites' {
     Import-Module "$PSScriptRoot/Helpers.psm1"
 }
 
-$PSStyle.OutputRendering = 'Ansi'
-$repo = $env:GITHUB_REPOSITORY
+$owner = $env:GITHUB_REPOSITORY_OWNER
+$repo = $env:GITHUB_REPOSITORY_NAME
 $runId = $env:GITHUB_RUN_ID
-$codeCoverageFolder = New-Item -Path . -ItemType Directory -Name 'CodeCoverage' -Force
-gh run download $runId --repo $repo --pattern *-CodeCoverage --dir CodeCoverage
-$files = Get-ChildItem -Path $codeCoverageFolder -Recurse -File -Filter *.json | Sort-Object Name
+
+$files = Get-GitHubArtifact -Owner $owner -Repository $repo -WorkflowRunID $runId -Name '*-CodeCoverage' |
+    Save-GitHubArtifact -Path 'CodeCoverage' -Force -Expand -PassThru | Get-ChildItem -Recurse -Filter *.json | Sort-Object Name -Unique
 
 LogGroup 'List files' {
     $files.Name | Out-String
