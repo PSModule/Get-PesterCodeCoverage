@@ -25,7 +25,7 @@ This GitHub Action is a part of the [PSModule framework](https://github.com/PSMo
 | `Version` | Exact version of GitHub module to install | No | Latest |
 | `Prerelease` | Allow prerelease versions | No | `false` |
 | `WorkingDirectory` | Working directory for the action | No | `.` |
-| `StepSummary_Mode` | Step summary sections to show (`Full`, `None`, or comma-separated list of `Missed,Executed,Files`) | No | `Missed,Files` |
+| `StepSummary_Mode` | Controls which sections to show in the GitHub step summary. Use 'Full' for all sections, 'None' to disable, or a comma-separated list of 'Missed, Executed, Files'. | No | `Missed, Files` |
 | `CodeCoveragePercentTarget` | Target code coverage percentage | No | Max target from individual reports |
 
 ### Example Workflow
@@ -99,7 +99,7 @@ Summary:
    StepSummary_Mode: None
 
    # Custom selection
-   StepSummary_Mode: Missed,Files
+   StepSummary_Mode: Missed, Files
    ```
 
 ## Troubleshooting
