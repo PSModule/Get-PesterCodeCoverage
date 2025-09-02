@@ -23,7 +23,7 @@ jobs:
     steps:
       # Need to check out as part of the test, as its a local action
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Upload artifact from tests:
       - name: Upload artifact [Environments-macOS-CodeCoverage]
