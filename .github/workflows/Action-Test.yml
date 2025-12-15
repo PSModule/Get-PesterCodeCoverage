@@ -27,7 +27,7 @@ jobs:
 
       # Upload artifact from tests:
       - name: Upload artifact [Environments-macOS-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Environments-macOS-CodeCoverage
           path: ./tests/CodeCoverage/Environments-macOS-CodeCoverage
@@ -35,7 +35,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifact [Environments-Windows-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Environments-Windows-CodeCoverage
           path: ./tests/CodeCoverage/Environments-Windows-CodeCoverage
@@ -43,7 +43,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifact [Module-macOS-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Module-macOS-CodeCoverage
           path: ./tests/CodeCoverage/Module-macOS-CodeCoverage
@@ -51,7 +51,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifact [Module-Windows-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: Module-Windows-CodeCoverage
           path: ./tests/CodeCoverage/Module-Windows-CodeCoverage
@@ -59,7 +59,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifact [MyTests-macOS-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: MyTests-macOS-CodeCoverage
           path: ./tests/CodeCoverage/MyTests-macOS-CodeCoverage
@@ -67,7 +67,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload artifact [MyTests-Windows-CodeCoverage]
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: MyTests-Windows-CodeCoverage
           path: ./tests/CodeCoverage/MyTests-Windows-CodeCoverage
