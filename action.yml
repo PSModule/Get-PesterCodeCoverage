@@ -39,7 +39,7 @@ runs:
   using: composite
   steps:
     - name: Get-PesterCodeCoverage
-      uses: PSModule/GitHub-Script@2010983167dc7a41bcd84cb88e698ec18eccb7ca # v1.7.8
+      uses: PSModule/GitHub-Script@0097f3bbe3f413f3b577b9bcc600727b0ca3201a # v1.7.10
       env:
         PSMODULE_GET_PESTERCODECOVERAGE_INPUT_StepSummary_Mode: ${{ inputs.StepSummary_Mode }}
         PSMODULE_GET_PESTERCODECOVERAGE_INPUT_CodeCoveragePercentTarget: ${{ inputs.CodeCoveragePercentTarget }}
