@@ -19,7 +19,7 @@ This GitHub Action is a part of the [PSModule framework](https://github.com/PSMo
 ### Inputs
 
 | Name | Description | Required | Default |
-|------|-------------|----------|---------|
+| ---- | ----------- | -------- | ------- |
 | `Debug` | Enable debug output | No | `false` |
 | `Verbose` | Enable verbose output | No | `false` |
 | `Version` | Exact version of GitHub module to install | No | Latest |
@@ -61,7 +61,7 @@ Example summary:
 
 Summary:
 | Coverage | Target | Analyzed      | Executed      | Missed        | Files         |
-|----------|--------|---------------|---------------|---------------|---------------|
+| -------- | ------ | ------------- | ------------- | ------------- | ------------- |
 | 85%      | 80%    | 1000 commands | 850 commands  | 150 commands  | 15 files      |
 
 ▶️ Missed commands [150] (click to expand)
