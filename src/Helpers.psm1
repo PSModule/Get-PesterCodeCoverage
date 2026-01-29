@@ -13,7 +13,7 @@
     .OUTPUTS
     Returns the normalized multi-line string.
     s#>
-    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseApprovedVerbs', '', Scope = 'Function', Justification = 'Function isnt exported.')]
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseApprovedVerbs', '', Scope = 'Function', Justification = 'Function isn''t exported.')]
     [OutputType([string])]
     [CmdletBinding()]
     param(
